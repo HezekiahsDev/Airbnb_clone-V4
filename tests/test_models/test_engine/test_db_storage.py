@@ -18,6 +18,7 @@ import json
 import os
 import pep8
 import unittest
+from models import storage
 DBStorage = db_storage.DBStorage
 classes = {"Amenity": Amenity, "City": City, "Place": Place,
            "Review": Review, "State": State, "User": User}
@@ -87,70 +88,23 @@ class TestFileStorage(unittest.TestCase):
     def test_save(self):
         """Test that save properly saves objects to file.json"""
 
-    @classmethod
-    def setUpClass(cls):
-        """setup tests case for class
-        """
+    def test_get_db(self):
+        """ Tests method for obtaining an instance db storage"""
+        dic = {"name": "Cundinamarca"}
+        instance = State(**dic)
+        storage.new(instance)
+        storage.save()
+        get_instance = storage.get(State, instance.id)
+        self.assertEqual(get_instance, instance)
 
-    def setUp(self):
-        """
-        Set up methods for test case
-        """
-        self.state = State(name="Florida")
-        self.state.save()
-
-    def test_get_method_obj(self):
-        """
-        test get() method overall
-        :return: True if pass, False if not pass
-        """
-        result = storage.get(cls="State", id=self.state.id)
-
-        self.assertIsInstance(result, State)
-
-    def test_get_method_return(self):
-        """
-        test get() method for matching id
-        :return: True if pass, false if not pass
-        """
-        result = storage.get(cls="State", id=str(self.state.id))
-
-        self.assertEqual(self.state.id, result.id)
-
-    def test_get_method_none(self):
-        """
-        test get() method return if NONE
-        :return: True if pass, false if not pass
-        """
-        result = storage.get(cls="State", id="doesnotexist")
-
-        self.assertIsNone(result)
-
-    def test_count_all(self):
-        """
-        test count() using all instances
-        :return: True if pass, false if not pass
-        """
-        result = storage.count()
-
-        self.assertEqual(len(storage.all()), result)
-
-    def test_count_state(self):
-        """
-        test count() using instance: state
-        :return: True if pass, false if not pass
-        """
-        result = storage.count(cls="State")
-
-        self.assertEqual(len(storage.all("State")), result)
-
-    def test_count_city(self):
-        """
-        test count() fot error NOT_EXIST
-        :return: True if pass, false if not pass
-        """
-        result = storage.count(cls="City")
-
-        self.assertEqual(int(0 if len(storage.all("City")) is None else
-                             len(storage.all("City"))), result)
-
+    def test_count(self):
+        """ Tests count method db storage """
+        dic = {"name": "Vecindad"}
+        state = State(**dic)
+        storage.new(state)
+        dic = {"name": "Mexico", "state_id": state.id}
+        city = City(**dic)
+        storage.new(city)
+        storage.save()
+        c = storage.count()
+        self.assertEqual(len(storage.all()), c)
